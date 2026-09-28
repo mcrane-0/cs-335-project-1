@@ -150,10 +150,17 @@ int main() {
     LexAnalyzer lexer(input);
     Token tkn;
     bool lineComment = false;
+    //check for comment block flag
     while (lexer.getBlockComment())
     {
         lexer.ignoreCommentBlock();
     }
+    if (lexer.getBlockComment())
+    {
+      //  break;
+    }
+    else
+    {
     //Loop processes 1 line from input file
     while (lexer.inputRemaining() && !lineComment)
     {
@@ -196,6 +203,12 @@ int main() {
                 {
                     lexer.ignoreCommentBlock();
                     cout << "block ignored!";
+                    if (lexer.getBlockComment())
+                    {
+                        cout << "we are in a block comment! continue to next vector";
+                        break;
+                    }
+
 
                 }
             }
@@ -321,6 +334,7 @@ int main() {
             }
         }
     }
+}
     //We need a loop that will re-enter my loop while the file still has lines remaining
     //We need an output that actually stores the tokens
 }
