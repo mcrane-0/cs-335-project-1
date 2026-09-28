@@ -20,13 +20,20 @@ int main() {
     private:
         vector<char> input;
         int position;
+            bool blockComment;
+
 
     public:
         LexAnalyzer(const vector<char>& inputVector)
         {
             input = inputVector;
             position = 0;
+            blockComment = false;
         }
+       bool getBlockComment()
+       {
+        return blockComment;
+       }
         void advance()
         {
             position++;
@@ -47,19 +54,40 @@ int main() {
 
             return '\0';
         }
+       // void ignoreCommentBlock()
+        //{
+          //  while (inputRemaining() &&
+            //    !(current() == '*' && peek() == '/'))
+            //{
+             //   advance();
+            //}
+            //if (inputRemaining())
+            //{
+             //   advance();
+             //   advance();
+            //}
+      //  }
         void ignoreCommentBlock()
         {
-            while (inputRemaining() &&
-                !(current() == '*' && peek() == '/'))
+            blockComment = false;
+            while (current() != '*' && peek() != '/')
+        {
+            if (inputRemaining())
             {
                 advance();
             }
-
+            else
+            {
+                blockComment = true;
+                break;
+            }
+        }
             if (inputRemaining())
             {
                 advance();
                 advance();
             }
+        
         }
         void ignoreWhiteSpace()
         {
@@ -122,6 +150,10 @@ int main() {
     LexAnalyzer lexer(input);
     Token tkn;
     bool lineComment = false;
+    while (lexer.getBlockComment())
+    {
+        lexer.ignoreCommentBlock();
+    }
     //Loop processes 1 line from input file
     while (lexer.inputRemaining() && !lineComment)
     {
