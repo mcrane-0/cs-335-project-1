@@ -69,7 +69,6 @@ int main() {
       //  }
         void ignoreCommentBlock()
         {
-            blockComment = false;
             while (current() != '*' && peek() != '/')
         {
             if (inputRemaining())
@@ -82,6 +81,7 @@ int main() {
                 break;
             }
         }
+        blockComment = false;
             if (inputRemaining())
             {
                 advance();
