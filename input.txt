@@ -1,0 +1,6 @@
+read A1 // haha
+read A2 /* this is a
+multi line
+comment*/ sum :=( A1 -33) + A2 *5.5
+write sum
+write ( A1 + A2 ) /2
