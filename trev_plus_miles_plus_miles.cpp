@@ -6,6 +6,8 @@
 using namespace std;
 
 ifstream infile("input.txt"); // input file
+vector<string> infileVector = {};
+int currentLine;
 vector<char> input = {}; // vector to store line from file
 
 void clearInputVector(){
@@ -14,13 +16,16 @@ void clearInputVector(){
     }
 }
 
-void nextLineAsVector(int firstChar){
+void inputFileToVector(){
     string line = "";
-    getline (infile, line);
-    if (firstChar != -1){
-        line = static_cast<char>(firstChar) + line;
+    while (getline (infile, line)) {
+        infileVector.push_back(line);
     }
-    cout << endl << "DEBUG:\t" << line << endl;
+    cout << "DEBUG:\tImported infile to infileVector!" << endl;
+}
+
+void nextLineAsVector(int lineNum){
+    string line = infileVector[lineNum];
     const char* cline = line.c_str();
 
     clearInputVector();
@@ -30,39 +35,37 @@ void nextLineAsVector(int firstChar){
 }
 
 // NOT WORKING? RECURSIVE EDITION
-void ignoreBlockComment(){
+int ignoreBlockComment(int lineNum){
     // search for "*/"
     int endLocation = -1; // index of '*' of comment end in vector. -1 means it hasnt been found
+    cout << "DEBUG:\tSearching for block comment end..." << endl;
     for (int i = 0; i < (input.size() - 2); i++){
-        cout << "DEBUG:\tSearching for block comment end..." << endl;
         if (input[i] == '*' && input[i + 1] == '/'){ // if current and next characters make "*/"
             endLocation = i;
         }
     }
 
     if (endLocation != -1 && endLocation != (input.size() - 2)){ // if end location has been found and isn't at the end of vector
-        cout << "DEBUG:\tBlock comment end found! NOT at end of vector." << endl;
+        cout << "DEBUG:\tBlock comment end found! NOT at end of vector. Line: " << lineNum << endl;
         vector<char> tempVector = {}; // create temporary vector to store everything after "*/"
         for (int i = (endLocation + 2); i < input.size(); i++){
-            cout << "DEBUG:\tCreating temporary vector to hold remaining line:\t" << input[i] << endl;
             tempVector.push_back(input[i]);
         }
         clearInputVector(); // clear input vector and copy contents from temp vector
         for (int i = 0; i < tempVector.size(); i++){
             input.push_back(tempVector[i]);
         }
-        return;
+        return lineNum;
     }
     else if (endLocation != -1 && endLocation == (input.size() - 2)) { // if end location found AT end of vector
-        cout << "DEBUG:\tBlock comment end found! at end of vector." << endl;
-        nextLineAsVector(-1); // get the next line/vector
-        return; // and return
+        cout << "DEBUG:\tBlock comment end found! at end of vector. Line: " << lineNum << endl;
+        nextLineAsVector(lineNum++); // get the next line/vector
+        return lineNum; // and return
     }
     else { // if "*/" wasn't found
-        cout << "DEBUG:\tBlock comment end NOT found. Getting next line and trying again." << endl;
-        nextLineAsVector(-1); // get the next line/vector
-        ignoreBlockComment(); // recursively call function with next line/vector
-        return; 
+        cout << "DEBUG:\tBlock comment end NOT found. Getting next line and trying again. Line: " << lineNum << endl;
+        nextLineAsVector(lineNum++); // get the next line/vector
+        return ignoreBlockComment(lineNum); // recursively call function with next line/vector
     }
 }
 
@@ -108,7 +111,7 @@ int main() {
     class LexAnalyzer
     {
     private:
-        vector<char> input;
+        //vector<char> input;
         int position;
             bool blockComment;
 
@@ -116,7 +119,7 @@ int main() {
     public:
         LexAnalyzer(const vector<char>& inputVector)
         {
-            input = inputVector;
+            // input = inputVector;
             position = 0;
             blockComment = false;
         }
@@ -242,9 +245,11 @@ int main() {
     };
 
     
-    int ch;
-    while ((ch = infile.get()) != EOF){
-        nextLineAsVector(ch);
+    inputFileToVector();
+    currentLine = 0;
+    while (currentLine < infileVector.size()){
+        nextLineAsVector(currentLine);
+        cout << endl << "STARTING AT NEW LINE: " << currentLine << endl;
             
         string number = "";
         string word = "";
@@ -311,9 +316,10 @@ int main() {
                             input.push_back(tempVector[i]);
                         }
 
-                        ignoreBlockComment();
+                        currentLine = ignoreBlockComment(currentLine);
+
                         lexer.resetPosition();
-                        cout << "DEBUG:\tBlock comment ignored!" << endl << "New position: " << lexer.getPosition() << endl;
+                        cout << "DEBUG:\tBlock comment ignored!" << endl << "New Line: " << currentLine << endl;
                     }
                 }
                 else
@@ -438,6 +444,7 @@ int main() {
                 }
             }
         }
+        currentLine++;
     
 }
     //We need a loop that will re-enter my loop while the file still has lines remaining
