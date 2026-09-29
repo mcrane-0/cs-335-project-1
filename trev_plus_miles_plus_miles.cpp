@@ -5,32 +5,82 @@
 
 using namespace std;
 
-vector<char> nextLineAsVector(ifstream& infile, int firstChar){
+ifstream infile("input.txt"); // input file
+vector<char> input = {}; // vector to store line from file
+
+void clearInputVector(){
+    while (input.empty() == 0){
+        input.pop_back();
+    }
+}
+
+void nextLineAsVector(int firstChar){
     string line = "";
     getline (infile, line);
-    line = static_cast<char>(firstChar) + line;
+    if (firstChar != -1){
+        line = static_cast<char>(firstChar) + line;
+    }
     cout << endl << "DEBUG:\t" << line << endl;
     const char* cline = line.c_str();
 
-    vector<char> vect = { };
+    clearInputVector();
     for (int i = 0; i < line.length(); i++){
-        vect.push_back(cline[i]);
+        input.push_back(cline[i]);
     }
-
-    return vect;
 }
 
 // NOT WORKING? RECURSIVE EDITION
+void ignoreBlockComment(){
+    // search for "*/"
+    int endLocation = -1; // index of '*' of comment end in vector. -1 means it hasnt been found
+    for (int i = 0; i < (input.size() - 2); i++){
+        cout << "DEBUG:\tSearching for block comment end..." << endl;
+        if (input[i] == '*' && input[i + 1] == '/'){ // if current and next characters make "*/"
+            endLocation = i;
+        }
+    }
+
+    if (endLocation != -1 && endLocation != (input.size() - 2)){ // if end location has been found and isn't at the end of vector
+        cout << "DEBUG:\tBlock comment end found! NOT at end of vector." << endl;
+        vector<char> tempVector = {}; // create temporary vector to store everything after "*/"
+        for (int i = (endLocation + 2); i < input.size(); i++){
+            cout << "DEBUG:\tCreating temporary vector to hold remaining line:\t" << input[i] << endl;
+            tempVector.push_back(input[i]);
+        }
+        clearInputVector(); // clear input vector and copy contents from temp vector
+        for (int i = 0; i < tempVector.size(); i++){
+            input.push_back(tempVector[i]);
+        }
+        return;
+    }
+    else if (endLocation != -1 && endLocation == (input.size() - 2)) { // if end location found AT end of vector
+        cout << "DEBUG:\tBlock comment end found! at end of vector." << endl;
+        nextLineAsVector(-1); // get the next line/vector
+        return; // and return
+    }
+    else { // if "*/" wasn't found
+        cout << "DEBUG:\tBlock comment end NOT found. Getting next line and trying again." << endl;
+        nextLineAsVector(-1); // get the next line/vector
+        ignoreBlockComment(); // recursively call function with next line/vector
+        return; 
+    }
+}
+
 // vector<char> ignoreBlockComment(vector<char> newInput, ifstream& infile){
 //     // search for "*/"
 //     int endLocation = -1; // index of '*' of comment end in vector. -1 means it hasnt been found
-//     for (int i = 0; i < (newInput.size() - 1); i++){
-//         if (newInput[i] == '*' && newInput[i + 1] == '/'){ // if current and next characters make "*/"
-//             endLocation = i;
+//     while (endLocation == -1){
+//         for (int i = 0; i < (newInput.size() - 1); i++){
+//             if (newInput[i] == '*' && newInput[i + 1] == '/'){ // if current and next characters make "*/"
+//                 endLocation = i;
+//             }
+//         }
+//         if (endLocation == -1){ // if it's still not found,
+//             int ch = infile.get(); // silly thing to make nextLineAsVector work properly
+//             newInput = nextLineAsVector(infile, ch); // call function to get next line/vector and try (loop) again
 //         }
 //     }
-
-//     if (endLocation != -1 && endLocation != (newInput.size() - 2)){ // if end location has been found and isn't at the end of vector
+//     if (endLocation != (newInput.size() - 2)){ // if end location isn't at the end of vector
 //         // create another new vector and store everything after "*/"
 //         vector<char> newNewInput = {};
 //         for (int i = endLocation + 2; i < newInput.size(); i++){
@@ -38,43 +88,11 @@ vector<char> nextLineAsVector(ifstream& infile, int firstChar){
 //         }
 //         return newNewInput;
 //     }
-//     else if (endLocation != -1 && endLocation == (newInput.size() - 2)) { // if end location found AT end of vector
+//     else /*if (endLocation != -1 && endLocation == (newInput.size() - 2))*/ { // if end location IS at end of vector
 //         int ch = infile.get(); // silly thing to make nextLineAsVector work properly
 //         return ( nextLineAsVector(infile, ch) ); // return the next line/vector
 //     }
-//     else { // if "*/" wasn't found
-//         int ch = infile.get(); // silly thing to make nextLineAsVector work properly
-//         return ( ignoreBlockComment( nextLineAsVector(infile, ch), infile ) ); // recursively call function with next line/vector
-//     }
 // }
-
-vector<char> ignoreBlockComment(vector<char> newInput, ifstream& infile){
-    // search for "*/"
-    int endLocation = -1; // index of '*' of comment end in vector. -1 means it hasnt been found
-    while (endLocation == -1){
-        for (int i = 0; i < (newInput.size() - 1); i++){
-            if (newInput[i] == '*' && newInput[i + 1] == '/'){ // if current and next characters make "*/"
-                endLocation = i;
-            }
-        }
-        if (endLocation == -1){ // if it's still not found,
-            int ch = infile.get(); // silly thing to make nextLineAsVector work properly
-            newInput = nextLineAsVector(infile, ch); // call function to get next line/vector and try (loop) again
-        }
-    }
-    if (endLocation != (newInput.size() - 2)){ // if end location isn't at the end of vector
-        // create another new vector and store everything after "*/"
-        vector<char> newNewInput = {};
-        for (int i = endLocation + 2; i < newInput.size(); i++){
-            newNewInput.push_back(newInput[i]);
-        }
-        return newNewInput;
-    }
-    else /*if (endLocation != -1 && endLocation == (newInput.size() - 2))*/ { // if end location IS at end of vector
-        int ch = infile.get(); // silly thing to make nextLineAsVector work properly
-        return ( nextLineAsVector(infile, ch) ); // return the next line/vector
-    }
-}
 
 int main() {
     enum class TokenType
@@ -223,12 +241,10 @@ int main() {
         string specificType = "";
     };
 
-    ifstream infile("input.txt");
     
-    vector<char> input = {};
     int ch;
-    /*while ((ch = infile.get()) != EOF)*/ if(true){
-        input = nextLineAsVector(infile, ch);
+    while ((ch = infile.get()) != EOF){
+        nextLineAsVector(ch);
             
         string number = "";
         string word = "";
@@ -284,15 +300,20 @@ int main() {
                         // }
 
                         lexer.advance();
+                        lexer.advance();
 
-                        // create new vector and store everything after "/*"
-                        vector<char> newInput = {};
+                        vector<char> tempVector = {}; // create temporary vector to store everything after "/*"
                         for (int i = lexer.getPosition(); i < input.size(); i++){
-                            newInput.push_back(input[i]);
+                            tempVector.push_back(input[i]);
+                        }
+                        clearInputVector(); // clear input vector and copy contents from temp vector
+                        for (int i = 0; i < tempVector.size(); i++){
+                            input.push_back(tempVector[i]);
                         }
 
-                        input = ignoreBlockComment(newInput, infile);
+                        ignoreBlockComment();
                         lexer.resetPosition();
+                        cout << "DEBUG:\tBlock comment ignored!" << endl << "New position: " << lexer.getPosition() << endl;
                     }
                 }
                 else
