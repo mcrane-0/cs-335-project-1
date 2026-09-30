@@ -1,3 +1,11 @@
+/*
+CS 335 Programming Assignment 1
+Chloe Cantrell, Miles Crane, Trevor Past
+
+Generative AI was NOT used for this assignment.
+*/
+
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -34,7 +42,6 @@ void nextLineAsVector(int lineNum){
     }
 }
 
-// NOT WORKING? RECURSIVE EDITION
 int ignoreBlockComment(int lineNum){
     // search for "*/"
     int endLocation = -1; // index of '*' of comment end in vector. -1 means it hasnt been found
@@ -69,34 +76,6 @@ int ignoreBlockComment(int lineNum){
     }
 }
 
-// vector<char> ignoreBlockComment(vector<char> newInput, ifstream& infile){
-//     // search for "*/"
-//     int endLocation = -1; // index of '*' of comment end in vector. -1 means it hasnt been found
-//     while (endLocation == -1){
-//         for (int i = 0; i < (newInput.size() - 1); i++){
-//             if (newInput[i] == '*' && newInput[i + 1] == '/'){ // if current and next characters make "*/"
-//                 endLocation = i;
-//             }
-//         }
-//         if (endLocation == -1){ // if it's still not found,
-//             int ch = infile.get(); // silly thing to make nextLineAsVector work properly
-//             newInput = nextLineAsVector(infile, ch); // call function to get next line/vector and try (loop) again
-//         }
-//     }
-//     if (endLocation != (newInput.size() - 2)){ // if end location isn't at the end of vector
-//         // create another new vector and store everything after "*/"
-//         vector<char> newNewInput = {};
-//         for (int i = endLocation + 2; i < newInput.size(); i++){
-//             newNewInput.push_back(newInput[i]);
-//         }
-//         return newNewInput;
-//     }
-//     else /*if (endLocation != -1 && endLocation == (newInput.size() - 2))*/ { // if end location IS at end of vector
-//         int ch = infile.get(); // silly thing to make nextLineAsVector work properly
-//         return ( nextLineAsVector(infile, ch) ); // return the next line/vector
-//     }
-// }
-
 int main() {
     enum class TokenType
     {
@@ -111,7 +90,6 @@ int main() {
     class LexAnalyzer
     {
     private:
-        //vector<char> input;
         int position;
             bool blockComment;
 
@@ -119,7 +97,6 @@ int main() {
     public:
         LexAnalyzer(const vector<char>& inputVector)
         {
-            // input = inputVector;
             position = 0;
             blockComment = false;
         }
@@ -155,41 +132,7 @@ int main() {
 
             return '\0';
         }
-       // void ignoreCommentBlock()
-        //{
-          //  while (inputRemaining() &&
-            //    !(current() == '*' && peek() == '/'))
-            //{
-             //   advance();
-            //}
-            //if (inputRemaining())
-            //{
-             //   advance();
-             //   advance();
-            //}
-      //  }
-        // void ignoreCommentBlock()
-        // {
-        //     while (current() != '*' && peek() != '/')
-        //     {
-        //         if (inputRemaining())
-        //         {
-        //             advance();
-        //         }
-        //         else
-        //         {
-        //             blockComment = true;
-        //             break;
-        //         }
-        //     }
-        // blockComment = false;
-        //     if (inputRemaining())
-        //     {
-        //         advance();
-        //         advance();
-        //     }
-        
-        // }
+
         void ignoreWhiteSpace()
         {
             while (inputRemaining() && current() == ' ')
@@ -304,14 +247,6 @@ int main() {
                     }
                     if (lexer.peek() == '*') // BLOCK COMMENT START
                     {
-                        // lexer.ignoreCommentBlock();
-                        // cout << "block ignored!";
-                        // if (lexer.getBlockComment())
-                        // {
-                        //     cout << "we are in a block comment! continue to next vector";
-                        //     break;
-                        // }
-
                         lexer.advance();
                         lexer.advance();
 
@@ -465,8 +400,6 @@ int main() {
         currentLine++;
     
 }
-    //We need a loop that will re-enter my loop while the file still has lines remaining
-    //We need an output that actually stores the tokens
 
     output.close();
     
